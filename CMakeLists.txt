@@ -4,11 +4,11 @@ project(test_asm)
 
 SET(CMAKE_BUILD_TYPE Release)
 
-SET (CMAKE_C_COMPILER   /usr/bin/clang++-17)
-SET (CMAKE_CXX_COMPILER /usr/bin/clang++-17)
+#SET (CMAKE_C_COMPILER   /usr/bin/clang++-17)
+#SET (CMAKE_CXX_COMPILER /usr/bin/clang++-17)
 SET (CMAKE_CXX_STANDARD 17)
 SET (CMAKE_CXX_FLAGS "")
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -Wall -march=native -mtune=native")
+SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -Wall -march=native -mtune=native --std=c++17")
 SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -I. -L/usr/local/lib")
 
 # Generate the source files list

@@ -40,10 +40,10 @@ uint64_t bitrankasm_u64_builtin(const uint64_t _val, const uint64_t pos)
 //
 //
 #if defined(__aarch64__) || defined(_M_ARM64)
-uint64_t bitrankasm_neon(const uint64_t _val, const uint64_t pos)
+uint64_t bitrankasm_arm(const uint64_t _val, const uint64_t pos)
 {
 	const uint64_t val = _val & ((2ULL << pos) - 1);
-	return popcount_u64_neon( val );
+	return popcount_u64_arm( val );
 }
 #endif
 //

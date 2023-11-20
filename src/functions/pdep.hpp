@@ -1,5 +1,5 @@
-#ifndef __tzcnt__
-#define __tzcnt__
+#ifndef __pdep__
+#define __pdep__
 #include <bit>
 #include <bitset>
 #include <cstdint>
@@ -19,39 +19,30 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //
-int tzcnt_u32_c(uint32_t x)
+inline int pdep_u32_c(uint32_t val, uint32_t mask)
 {
-    if (x == 0) {
-        return sizeof(x) * 4; // Si x est zéro, tous les bits sont à zéro
-    }
-
-    int count = 0;
-    while ((x & 1) == 0)
-    {
-        count++;
-        x >>= 1;
-    }
-
-    return count;
+  unsigned int res = 0;
+  for (uint32_t bb = 1; mask; bb += bb) {
+    if (val & bb)
+      res |= mask & -mask;
+    mask &= mask - 1;
+  }
+  return res;
 }
 //
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //
-int tzcnt_u64_c(uint64_t x) {
-    if (x == 0) {
-        return sizeof(x) * 8; // Si x est zéro, tous les bits sont à zéro
-    }
-
-    int count = 0;
-    while ((x & 1) == 0)
-    {
-        count++;
-        x >>= 1;
-    }
-
-    return count;
+inline int64_t pdep_u64_c(const uint64_t val, uint64_t mask)
+{
+  int64_t res = 0;
+  for (uint64_t bb = 1; mask; bb += bb) {
+    if (val & bb)
+      res |= mask & -mask;
+    mask &= mask - 1;
+  }
+  return res;
 }
 //
 //
@@ -59,9 +50,9 @@ int tzcnt_u64_c(uint64_t x) {
 //
 //
 #if defined(__SSE4_2__)
-int tzcnt_u32_builtin(uint32_t x)
+inline int pdep_u32_builtin(uint32_t val, uint32_t mask)
 {
-    return __builtin_ctz(x);
+  return _pdep_u32(val, mask);
 }
 #endif
 //
@@ -70,9 +61,9 @@ int tzcnt_u32_builtin(uint32_t x)
 //
 //
 #if defined(__SSE4_2__)
-int tzcnt_u64_builtin(uint64_t x)
+inline int64_t pdep_u64_builtin(const uint64_t val, const uint64_t mask)
 {
-    return __builtin_ctzll(x);
+  return _pdep_u64(val, mask);
 }
 #endif
 //
@@ -81,10 +72,15 @@ int tzcnt_u64_builtin(uint64_t x)
 //
 //
 #if defined(__SSE4_2__)
-inline uint32_t tzcnt_u32_x86(uint32_t x) {
-    uint64_t r;
-    asm("tzcntq %1, %0" : "=r"(r) : "r"((uint64_t)x));
-    return r;
+int pdep_u32_x86(uint32_t num, uint32_t rank)
+{
+    int rsu;
+	  asm("pdep %[mask], %[num], %[rsu]"
+		    : [rsu]  "=r" (rsu)
+        : [num]  "r" (val),
+          [mask] "r" (mask)
+    );
+    return rsu;
 }
 #endif
 //
@@ -93,21 +89,15 @@ inline uint32_t tzcnt_u32_x86(uint32_t x) {
 //
 //
 #if defined(__SSE4_2__)
-inline int tzcnt_u64_x86(uint64_t x) {
-    uint64_t r;
-    asm("tzcntq %1, %0" : "=r"(r) : "r"(x));
-    return r;
-}
-#endif
-//
-//
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//
-#if defined(__aarch64__) || defined(_M_ARM64)
-inline int tzcnt_u32_neon(uint32_t num)
+inline int64_t pdep_u64_x86 (const uint64_t val, const uint64_t mask)
 {
-    return __builtin_clz( __builtin_arm_rbit( num ) );
+    int64_t rsu;
+	asm("pdep %[mask], %[num], %[rsu]"
+			: [rsu]  "=r" (rsu)
+            : [num]  "r" (val),
+              [mask] "r" (mask)
+        );
+    return rsu;
 }
 #endif
 //
@@ -115,15 +105,22 @@ inline int tzcnt_u32_neon(uint32_t num)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //
-#if defined(__aarch64__) || defined(_M_ARM64)
-inline int tzcnt_u64_neon(uint64_t num)
+inline int64_t pdep_u64_arm (const uint64_t val, const uint64_t _mask)
 {
-    return __builtin_clzll( __builtin_arm_rbit64( num ) );
+  uint64_t mask = _mask;
+  int64_t res = 0;
+  for (uint64_t bb = 1; mask; bb += bb) {
+    if (val & bb)
+      res |= mask & -mask;
+    mask &= mask - 1;
+  }
+  return res;
 }
-#endif
+//
 //
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 //
 //
 #endif

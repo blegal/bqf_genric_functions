@@ -19,10 +19,10 @@ uint64_t bitselectasm_u64_c(uint64_t num, uint64_t rank){
 //
 //
 #if defined(__aarch64__) || defined(_M_ARM64)
-uint64_t bitselectasm_u64_neon(uint64_t num, uint64_t rank){
+uint64_t bitselectasm_u64_arm(uint64_t num, uint64_t rank){
     const uint64_t i = 1ULL << (rank - 1); // i = 2^rank
-    const uint64_t j = pdep_u64_neon(i, num);
-    const uint64_t k = tzcnt_u64_neon(num);
+    const uint64_t j = pdep_u64_arm(i, num);
+    const uint64_t k = tzcnt_u64_arm(j);
 	return k;
 }
 #endif
